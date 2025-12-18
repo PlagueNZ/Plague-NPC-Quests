@@ -1,7 +1,7 @@
 local UPDATE = {
   enabled = true,
-  repo = "PlagueNZ/plague_npc_quests_2.0", -- CHANGE: owner/repo
-  intervalMinutes = 360,                  -- check every 6 hours
+  repo = "PlagueNZ/Plague-NPC-Quests", -- CHANGE: owner/repo
+  intervalMinutes = 3600,                  -- check every 6 hours
   notifyOnStart = true
 }
 
