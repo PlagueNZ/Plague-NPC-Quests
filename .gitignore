@@ -3,7 +3,11 @@
 
 # allow these
 !.gitignore
+!README.md
 !version.json
-!.github/
-!.github/**
 !fxmanifest.lua
+
+# allow workflow files
+!.github/
+!.github/workflows/
+!.github/workflows/version.yml
