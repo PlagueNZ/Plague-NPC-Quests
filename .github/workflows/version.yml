@@ -3,8 +3,6 @@ name: Update version.json
 on:
   push:
     branches: [ "master" ]
-    paths:
-      - "fxmanifest.lua"
   workflow_dispatch: {}
 
 permissions:
