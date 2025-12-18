@@ -4,3 +4,5 @@
 # allow these
 !.gitignore
 !version.json
+!.github/
+!.github/**
