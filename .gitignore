@@ -6,4 +6,4 @@
 !version.json
 !.github/
 !.github/**
-!fxmainfest.lua
+!fxmanifest.lua
