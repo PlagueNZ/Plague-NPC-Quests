@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'Plague'
 description 'NPC Quest System'
-version '1.6'
+version '1.7'
 
 lua54 'yes'
 
@@ -28,6 +28,7 @@ client_scripts {
 server_scripts {
   '@oxmysql/lib/MySQL.lua',
   'server/quests.lua',
+  'server/version.lua',
   
   'server/s_main.lua',
 }
