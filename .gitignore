@@ -3,5 +3,4 @@
 
 # allow these
 !.gitignore
-!README.md
 !version.json
