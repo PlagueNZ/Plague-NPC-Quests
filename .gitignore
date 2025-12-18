@@ -1,6 +1,7 @@
 # ignore everything
 *
-fxmainest.lua
+
 # allow these
 !.gitignore
+!README.md
 !version.json
