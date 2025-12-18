@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'Plague'
 description 'NPC Quest System'
-version '1.5.4'
+version '1.5.5'
 
 lua54 'yes'
 
