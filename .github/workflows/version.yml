@@ -2,7 +2,9 @@ name: Update version.json
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "master", "main" ]
+    paths:
+      - "fxmanifest.lua"
   workflow_dispatch: {}
 
 permissions:
@@ -19,13 +21,10 @@ jobs:
         id: ver
         run: |
           python3 - << 'PY' > /tmp/version.txt
-import re, pathlib, sys
+import re, pathlib
 raw = pathlib.Path("fxmanifest.lua").read_text(encoding="utf-8", errors="ignore")
 m = re.search(r"version\s+['\"]([^'\"]+)['\"]", raw)
-if not m:
-  print("0.0.0")
-  sys.exit(0)
-print(m.group(1))
+print(m.group(1) if m else "0.0.0")
 PY
           echo "version=$(cat /tmp/version.txt)" >> $GITHUB_OUTPUT
 
@@ -36,7 +35,7 @@ import json, datetime
 from pathlib import Path
 ver = "${{ steps.ver.outputs.version }}".strip() or "0.0.0"
 data = {
-  "name": "plague_npc_quests",
+  "resource": "Plague NPC Quests",
   "latest": ver,
   "updated_utc": datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
 }
@@ -45,8 +44,8 @@ PY
 
       - name: Commit & push if changed
         run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
           git add version.json
           git diff --cached --quiet || git commit -m "chore: bump version.json to ${{ steps.ver.outputs.version }}"
           git push
