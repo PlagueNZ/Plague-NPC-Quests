@@ -23,7 +23,7 @@ jobs:
           python3 - <<'PY' > /tmp/version.txt
           import re, pathlib
           raw = pathlib.Path("fxmanifest.lua").read_text(encoding="utf-8", errors="ignore")
-          m = re.search(r"version\s+['\"]([^'\"]+)['\"]", raw)
+          m = re.search(r"^version\s+['\"]([^'\"]+)['\"]", raw, re.MULTILINE)
           print(m.group(1) if m else "0.0.0")
           PY
           echo "version=$(cat /tmp/version.txt)" >> "$GITHUB_OUTPUT"
