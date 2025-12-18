@@ -1,0 +1,54 @@
+name: Update version.json
+
+on:
+  push:
+    branches: [ "master" ]
+    paths:
+      - "fxmanifest.lua"
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update-version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Read version from fxmanifest.lua
+        id: ver
+        run: |
+          python3 - << 'PY' > /tmp/version.txt
+import re, pathlib, sys
+raw = pathlib.Path("fxmanifest.lua").read_text(encoding="utf-8", errors="ignore")
+m = re.search(r"version\s+['\"]([^'\"]+)['\"]", raw)
+if not m:
+  print("0.0.0")
+  sys.exit(0)
+print(m.group(1))
+PY
+          echo "version=$(cat /tmp/version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Write version.json
+        run: |
+          python3 - << 'PY'
+import json, datetime
+from pathlib import Path
+ver = "${{ steps.ver.outputs.version }}".strip() or "0.0.0"
+data = {
+  "name": "plague_npc_quests",
+  "latest": ver,
+  "updated_utc": datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+}
+Path("version.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+PY
+
+      - name: Commit & push if changed
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add version.json
+          git diff --cached --quiet || git commit -m "chore: bump version.json to ${{ steps.ver.outputs.version }}"
+          git push
