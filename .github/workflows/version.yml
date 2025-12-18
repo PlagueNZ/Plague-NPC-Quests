@@ -20,27 +20,28 @@ jobs:
       - name: Read version from fxmanifest.lua
         id: ver
         run: |
-          python3 - << 'PY' > /tmp/version.txt
-import re, pathlib
-raw = pathlib.Path("fxmanifest.lua").read_text(encoding="utf-8", errors="ignore")
-m = re.search(r"version\s+['\"]([^'\"]+)['\"]", raw)
-print(m.group(1) if m else "0.0.0")
-PY
-          echo "version=$(cat /tmp/version.txt)" >> $GITHUB_OUTPUT
+          python3 - <<'PY' > /tmp/version.txt
+          import re, pathlib
+          raw = pathlib.Path("fxmanifest.lua").read_text(encoding="utf-8", errors="ignore")
+          m = re.search(r"version\s+['\"]([^'\"]+)['\"]", raw)
+          print(m.group(1) if m else "0.0.0")
+          PY
+          echo "version=$(cat /tmp/version.txt)" >> "$GITHUB_OUTPUT"
 
       - name: Write version.json
         run: |
-          python3 - << 'PY'
-import json, datetime
-from pathlib import Path
-ver = "${{ steps.ver.outputs.version }}".strip() or "0.0.0"
-data = {
-  "resource": "Plague NPC Quests",
-  "latest": ver,
-  "updated_utc": datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
-}
-Path("version.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
-PY
+          python3 - <<'PY'
+          import json, datetime
+          from pathlib import Path
+
+          ver = "${{ steps.ver.outputs.version }}".strip() or "0.0.0"
+          data = {
+            "resource": "Plague NPC Quests",
+            "latest": ver,
+            "updated_utc": datetime.datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
+          }
+          Path("version.json").write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+          PY
 
       - name: Commit & push if changed
         run: |
