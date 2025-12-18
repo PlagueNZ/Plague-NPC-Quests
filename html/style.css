@@ -1,0 +1,163 @@
+:root{
+  --panel-w: 760px;
+
+  --bg: rgba(0,0,0,0.0);
+
+  --panel: rgba(10, 10, 12, 0.72);
+  --panel-2: rgba(10, 10, 12, 0.55);
+
+  --stroke: rgba(255,255,255,0.08);
+  --stroke-2: rgba(255,255,255,0.12);
+
+  --text: rgba(255,255,255,0.92);
+  --muted: rgba(255,255,255,0.62);
+
+  --accent: rgba(0, 170, 255, 0.9);
+  --danger: rgba(255, 80, 80, 0.9);
+}
+
+*{
+  box-sizing: border-box;
+  font-family: system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+}
+
+body{
+  margin:0;
+  padding:0;
+  background: transparent;
+  overflow:hidden;
+}
+
+.root{
+  position: fixed;
+  inset: 0;
+  background: var(--bg);
+}
+
+.hidden{ display:none; }
+
+.panel{
+  position:absolute;
+  left:50%;
+  bottom:52px;
+  transform:translateX(-50%);
+  width:min(var(--panel-w), 92vw);
+}
+
+/* Main “NPC Response” box */
+.responseBox{
+  background: linear-gradient(180deg, var(--panel), var(--panel-2));
+  border: 1px solid var(--stroke);
+  border-radius: 14px;
+  padding: 16px 18px;
+  min-height: 92px;
+
+  box-shadow:
+    0 16px 60px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+.responseTitle{
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.6px;
+  text-transform: none;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.responseText{
+  font-size: 16px;
+  color: var(--text);
+  line-height: 1.35;
+  white-space: pre-wrap;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.45);
+}
+
+/* Button list */
+.menu{
+  margin-top: 10px;
+  display:flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.menuItem{
+  width: 100%;
+  text-align: left;
+
+  padding: 12px 14px;
+  border-radius: 12px;
+
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: var(--text);
+
+  font-size: 16px;
+  font-weight: 650;
+  text-transform: none;
+
+  cursor: pointer;
+  transition: transform 120ms ease, background 120ms ease, border 120ms ease;
+}
+
+.menuItem:hover{
+  background: rgba(255,255,255,0.07);
+  border-color: rgba(255,255,255,0.10);
+  transform: translateY(-1px);
+}
+
+.menuItem:active{
+  transform: translateY(0px);
+}
+
+.menuItem.danger{
+  border-color: rgba(255, 80, 80, 0.18);
+}
+
+.menuItem.danger:hover{
+  background: rgba(255, 80, 80, 0.10);
+  border-color: rgba(255, 80, 80, 0.25);
+}
+
+/* Hint line */
+.hint{
+  margin-top: 8px;
+  font-size: 13px;
+  color: rgba(255,255,255,0.5);
+  padding-left: 4px;
+}
+
+.npcHeader{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  margin-bottom:10px;
+  padding-bottom:10px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.npcName{
+  font-weight:800;
+  font-size:18px;
+  color: rgba(255,255,255,0.92);
+  letter-spacing: 0.4px;
+}
+
+.npcSubtitle{
+  font-weight:600;
+  font-size:13px;
+  color: rgba(255,255,255,0.60);
+}
+
+
+
+
+/* Small “open” animation */
+.panel{
+  animation: uiPop 140ms ease-out;
+}
+@keyframes uiPop{
+  from{ transform:translateX(-50%) translateY(8px); opacity:0; }
+  to{ transform:translateX(-50%) translateY(0px); opacity:1; }
+}

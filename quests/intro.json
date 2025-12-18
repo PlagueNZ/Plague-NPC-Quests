@@ -1,0 +1,37 @@
+{
+  "questId": "intro",
+  "npcs": [
+    {
+      "id": "teaser",
+      "name": "Stranger",
+      "subtitle": "Trying to get your attention",
+      "nodes": {
+        "start": {
+          "text": "Head to the bottom floor of Life Invader. Someone there has work for you.",
+          "buttons": [
+            {
+              "id": "leave",
+              "label": "Leave",
+              "next": null,
+              "action": "quest:setStage",
+              "close": true,
+              "data": { "questId": "intro", "stage": 1 },
+              "conditions": [
+                { "type": "questStage", "questId": "intro", "op": "==", "value": 0 }
+              ]
+            },
+            {
+              "id": "leave_done",
+              "label": "Leave",
+              "next": null,
+              "close": true,
+              "conditions": [
+                { "type": "questStage", "questId": "intro", "op": ">=", "value": 1 }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "questId": "hobo_king",
+  "npcs": [
+    {
+      "id": "giver",
+      "name": "Information Broker",
+      "subtitle": "Trades answers for favors",
+      "nodes": {
+        "start": {
+          "text": "What do you need?",
+          "buttons": [
+            {
+              "id": "greet",
+              "label": "Who are you?",
+              "next": "greet_response",
+              "conditions": [
+                { "type": "questStage", "questId": "intro", "op": "<", "value": 1  }
+              ]
+            },
+            {
+              "id": "ask",
+              "label": "I'm looking for the Hobo King",
+              "next": "hobo_intro",
+              "conditions": [
+                { "type": "questStage", "questId": "intro", "op": ">=", "value": 1 },
+                { "type": "questStage", "questId": "hobo_king", "op": "==", "value": 0 }
+              ]
+            },
+            {
+              "id": "topic_pay",
+              "label": "About the Hobo King…",
+              "next": "hobo_payment",
+              "conditions": [
+                { "type": "questStage", "questId": "hobo_king", "op": "==", "value": 1 }
+              ]
+            },
+            {
+              "id": "topic_done",
+              "label": "About the Hobo King…",
+              "next": "hobo_where",
+              "conditions": [
+                { "type": "questStage", "questId": "hobo_king", "op": ">=", "value": 2 }
+              ]
+            },
+            { "id": "leave", "label": "Leave", "next": null }
+          ]
+        },
+        "greet_response": {
+          "text": "What was that whistling at the Airport when you joined huh?",
+          "buttons": [
+            { "id": "leave", "label": "Leave", "next": null }
+          ]
+        },
+
+        "hobo_intro": {
+          "text": "Yeah, I’ve heard of him. People don’t say his name for free.",
+          "buttons": [
+            {
+              "id": "payment",
+              "label": "What do you need?",
+              "next": "hobo_payment",
+              "action": "quest:setStage",
+              "data": { "questId": "hobo_king", "stage": 1 }
+            },
+            { "id": "leave", "label": "Leave", "next": null }
+          ]
+        },
+
+        "hobo_payment": {
+          "text": "Bring me 50 plastic and $2000 in black money, then we’ll talk.",
+          "buttons": [
+            {
+              "id": "pay",
+              "label": "Pay",
+              "next": null,
+              "action": "quest:pay",
+              "data": {
+                "questId": "hobo_king",
+                "paymentKey": "hobo_king",
+                "npcId": "giver",
+                "okNodeId": "hobo_where",
+                "failNodeId": "hobo_missing"
+              }
+            },
+            { "id": "leave", "label": "Leave", "next": null }
+          ]
+        },
+
+        "hobo_where": {
+          "text": "Try the homeless camp under the bridge near Vanilla Unicorn.",
+          "buttons": [
+            { "id": "leave", "label": "Leave", "next": null, "close": true }
+          ]
+        },
+
+        "hobo_missing": {
+          "text": "You don’t have what I asked for. Come back when you do.",
+          "buttons": [
+            { "id": "leave", "label": "Leave", "next": null }
+          ]
+        }
+      }
+    }
+  ]
+}
