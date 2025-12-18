@@ -1,77 +1,113 @@
-local UPDATE = {
-  enabled = true,
-  repo = "PlagueNZ/Plague-NPC-Quests", -- CHANGE: owner/repo
-  intervalMinutes = 3600,                  -- check every 6 hours
-  notifyOnStart = true
-}
+-- server/version.lua
+-- Checks Cloudflare Pages for updates and logs if outdated.
 
-local function getLocalVersion()
-  -- You can set this in fxmanifest.lua as: version '2.0.3'
-  return GetResourceMetadata(GetCurrentResourceName(), "version", 0) or "0.0.0"
+local RESOURCE = GetCurrentResourceName()
+
+--local UPDATE_URL = "https://plague-npc-quests-updates.pages.dev/plague_npc_quests/version.json"
+-- When your custom domain is ready, swap to:
+local UPDATE_URL = "https://update.plagueoce.com/version.json"
+
+local function dbg(...)
+  if Util and Util.dbg then
+    Util.dbg(...)
+  else
+    print("^2[PLAGUE_NPC_QUEST]^7", ...)
+  end
 end
 
-local function normalizeTag(tag)
-  if type(tag) ~= "string" then return "" end
-  return tag:gsub("^v", ""):gsub("%s+", "")
+-- Read fxmanifest.lua and extract version 'x.y.z'
+local function getLocalVersion()
+  local raw = LoadResourceFile(RESOURCE, "fxmanifest.lua")
+  if not raw or raw == "" then return nil end
+
+  -- matches: version '0.0.1' or version "0.0.1"
+  local v = raw:match("version%s+['\"]([^'\"]+)['\"]")
+  if not v or v == "" then return nil end
+  return v
+end
+
+-- Parse versions like: 2.0.1, v2.0.1, 2.0, 2
+local function parseVersion(v)
+  if type(v) ~= "string" then return {0,0,0} end
+  v = v:gsub("^v", "")
+  local a,b,c = v:match("^(%d+)%.?(%d*)%.?(%d*)")
+  return {
+    tonumber(a) or 0,
+    tonumber(b) or 0,
+    tonumber(c) or 0
+  }
 end
 
 local function isNewer(remote, localv)
-  -- very simple semver compare: major.minor.patch
-  local function split(v)
-    local a,b,c = v:match("^(%d+)%.(%d+)%.(%d+)$")
-    return tonumber(a) or 0, tonumber(b) or 0, tonumber(c) or 0
+  local r = parseVersion(remote)
+  local l = parseVersion(localv)
+  for i = 1, 3 do
+    if r[i] > l[i] then return true end
+    if r[i] < l[i] then return false end
   end
-  local r1,r2,r3 = split(remote)
-  local l1,l2,l3 = split(localv)
-  if r1 ~= l1 then return r1 > l1 end
-  if r2 ~= l2 then return r2 > l2 end
-  return r3 > l3
+  return false
 end
 
-local function checkForUpdates()
-  if not UPDATE.enabled then return end
-
-  local localv = normalizeTag(getLocalVersion())
-  local url = ("https://api.github.com/repos/%s/releases/latest"):format(UPDATE.repo)
-
+local function httpGetJson(url, cb)
   PerformHttpRequest(url, function(code, body, headers)
-    if code ~= 200 or type(body) ~= "string" then
-      Util.dbg("^3UpdateCheck:^7 failed", "http=", code)
+    if code ~= 200 or not body or body == "" then
+      cb(false, ("HTTP %s"):format(tostring(code)), nil)
       return
     end
 
-    local data = json.decode(body)
-    if not data or not data.tag_name then
-      Util.dbg("^3UpdateCheck:^7 invalid response")
+    local ok, data = pcall(function()
+      return json.decode(body)
+    end)
+
+    if not ok or type(data) ~= "table" then
+      cb(false, "JSON decode failed", nil)
       return
     end
 
-    local remotev = normalizeTag(data.tag_name)
-    if remotev == "" then return end
-
-    if isNewer(remotev, localv) then
-      print(("^3[PLAGUE_NPC_QUEST]^7 Update available: ^5%s^7 (installed ^2%s^7)"):format(remotev, localv))
-      if data.html_url then
-        print(("^3[PLAGUE_NPC_QUEST]^7 Release: %s"):format(data.html_url))
-      end
-    else
-      Util.dbg("^2UpdateCheck:^7 up to date", "version=", localv)
-    end
+    cb(true, nil, data)
   end, "GET", "", {
-    ["User-Agent"] = "plague_npc_quest_update_checker",
-    ["Accept"] = "application/vnd.github+json"
+    ["User-Agent"] = "plague_npc_quests_update_check",
+    ["Accept"] = "application/json"
   })
 end
 
-CreateThread(function()
-  Wait(2000)
-  if UPDATE.notifyOnStart then
-    checkForUpdates()
-  end
+local function runCheck()
+  local localV = getLocalVersion() or "0.0.0"
+  dbg(("Version check: local=%s, url=%s"):format(localV, UPDATE_URL))
 
-  local ms = (tonumber(UPDATE.intervalMinutes) or 360) * 60 * 1000
-  while true do
-    Wait(ms)
-    checkForUpdates()
-  end
+  httpGetJson(UPDATE_URL, function(ok, err, data)
+    if not ok then
+      dbg("^3Update check failed:^7", err or "unknown error")
+      return
+    end
+
+    -- Expected JSON shape:
+    -- { "resource": "plague_npc_quests_2.0", "latest": "2.0.0", "notes": "...", "url": "..." }
+    local latest = tostring(data.latest or "")
+    if latest == "" then
+      dbg("^3Update check:^7 missing 'latest' in JSON")
+      return
+    end
+
+    local remoteIsNewer = isNewer(latest, localV)
+
+    if remoteIsNewer then
+      print("^1[PLAGUE_NPC_QUEST]^7 Update available!")
+      print(("^1[PLAGUE_NPC_QUEST]^7 Current: %s  Latest: %s"):format(localV, latest))
+      if data.notes and tostring(data.notes) ~= "" then
+        print(("^1[PLAGUE_NPC_QUEST]^7 Notes: %s"):format(tostring(data.notes)))
+      end
+      if data.url and tostring(data.url) ~= "" then
+        print(("^1[PLAGUE_NPC_QUEST]^7 More info: %s"):format(tostring(data.url)))
+      end
+    else
+      dbg(("Up to date (local=%s, latest=%s)"):format(localV, latest))
+    end
+  end)
+end
+
+CreateThread(function()
+  -- Delay slightly so resource is fully booted and util/config loaded
+  Wait(3500)
+  runCheck()
 end)
