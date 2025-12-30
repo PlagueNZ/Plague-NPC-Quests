@@ -3,7 +3,7 @@ game 'gta5'
 
 author 'Plague'
 description 'NPC Quest System'
-version '1.3.8'
+version '1.3.9'
 
 lua54 'yes'
 
@@ -12,6 +12,7 @@ shared_scripts {
   'config.lua',
   'config_notifs.lua',
   'shared/util.lua',
+  'shared/skillchecks.lua',
 }
 
 client_scripts {
